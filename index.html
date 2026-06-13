@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F.U.C.K.U.P Mainframe</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #000;
+      color: #00e040;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 22px;
+      line-height: 1.65;
+      padding: 32px 40px;
+      cursor: default;
+      user-select: none;
+    }
+
+    #screen { max-width: 900px; }
+
+    .line { display: block; white-space: pre; }
+
+    /* Cursor blink */
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    #cursor {
+      display: inline-block;
+      width: 14px;
+      height: 0.85em;
+      background: #00e040;
+      vertical-align: middle;
+      position: relative;
+      top: -0.05em;
+      animation: blink 1s step-end infinite;
+    }
+
+    /* Loading fade */
+    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+    @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+    #loadingScreen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      color: #00e040;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 22px;
+      align-items: center;
+      justify-content: center;
+    }
+    #loadingScreen.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+    #loadingScreen.hide {
+      animation: fadeOut 0.3s ease forwards;
+    }
+
+    /* Progress bar */
+    #loadingScreen { flex-direction: column; gap: 18px; }
+    @keyframes progress {
+      0%   { content: '[                    ]'; }
+      5%   { content: '[>                   ]'; }
+      10%  { content: '[=>                  ]'; }
+      15%  { content: '[==>                 ]'; }
+      20%  { content: '[===>                ]'; }
+      25%  { content: '[====>               ]'; }
+      30%  { content: '[=====>              ]'; }
+      35%  { content: '[======>             ]'; }
+      40%  { content: '[=======>            ]'; }
+      45%  { content: '[========>           ]'; }
+      50%  { content: '[=========>          ]'; }
+      55%  { content: '[==========>         ]'; }
+      60%  { content: '[===========>        ]'; }
+      65%  { content: '[============>       ]'; }
+      70%  { content: '[=============>      ]'; }
+      75%  { content: '[==============>     ]'; }
+      80%  { content: '[===============>    ]'; }
+      85%  { content: '[================>   ]'; }
+      90%  { content: '[=================>  ]'; }
+      95%  { content: '[==================> ]'; }
+      100% { content: '[====================]'; }
+    }
+    #progressBar::before {
+      content: '[                    ]';
+      white-space: pre;
+    }
+    #progressBar.running::before {
+      animation: progress 3s linear forwards;
+    }
+
+
+    /* BIOS screen */
+    .bios-row { display: none; white-space: pre; line-height: 1.65; }
+    tr.bios-row { display: none; }
+    tr.bios-row.visible { display: table-row; }
+    .bios-ok  { color: #00e040; }
+    .bios-title { font-size: 26px; font-weight: bold; margin-bottom: 20px; letter-spacing: 0.05em; }
+    #inputLine { margin-top: 8px; }
+    #inputDisplay { display: inline; }
+  </style>
+</head>
+<body>
+
+<!-- BIOS Boot Screen -->
+<div id="biosScreen">
+  <div class="bios-title" id="biosTitle1">--- Chiquita client v1.7 ---<br><br><br>Connecting to mainframe... OK</div>
+  <div class="bios-title" id="biosTitle2" style="display:none">Initializing remote session...</div>
+  <span class="bios-row" id="b1">Mainboard...............  Supermicro X13QH-T         <span class="bios-ok">OK</span>
+</span><span class="bios-row" id="b2">CPU.....................  4x Xeon Platinum           <span class="bios-ok">OK</span>
+</span><span class="bios-row" id="b3">Memory..................  12 TB ECC                  <span class="bios-ok">OK</span>
+</span><span class="bios-row" id="b4">GPU Cluster.............  4x NVIDIA L40S             <span class="bios-ok">OK</span>
+</span><span class="bios-row" id="b5">Storage Pool............  8.4 PB NVMe                <span class="bios-ok">OK</span>
+</span><span class="bios-row" id="b6">Power Draw..............  <span id="powerDraw"></span> kW                   <span class="bios-ok"> OK</span>
+</span>
+</div>
+
+<div id="screen" style="display:none">
+  <span class="line">--- F.U.C.K.U.P Mainframe v1.4.02 ---</span>
+  <span class="line">&nbsp;</span>
+  <span class="line" id="l1" style="display:none">Initializing distributed compute fabric...</span>
+  <span class="line" id="l2" style="display:none">Checking storage pools... OK</span>
+  <span class="line" id="l3" style="display:none">Mounting VM snapshots... OK</span>
+  <span class="line" id="l4" style="display:none">Negotiating GPU partitions... OK</span>
+  <span class="line" id="l5" style="display:none">&nbsp;</span>
+  <span class="line" id="l6" style="display:none">Choose your machine:</span>
+  <span class="line" id="l7"  style="display:none">1.  Win11 shooter gaming    (low ping)</span>
+  <span class="line" id="l8"  style="display:none">2.  Win11 graphics gaming   (max GPU)</span>
+  <span class="line" id="l9"  style="display:none">3.  Win11 average use</span>
+  <span class="line" id="l10" style="display:none">4.  MacOS cutting/editing</span>
+  <span class="line" id="l11" style="display:none">5.  Linux arch</span>
+  <span class="line" id="l12" style="display:none">6.  Linux debian</span>
+  <span class="line" id="l13" style="display:none">7.  Linux tails</span>
+  <span class="line" id="l14" style="display:none">8.  UniFi OS</span>
+  <span class="line" id="l15" style="display:none">9.  Reboot client</span>
+  <span class="line" id="l16" style="display:none">&nbsp;</span>
+  <div id="inputLine" style="display:none">
+    Select profile: <span id="inputDisplay"></span><span id="cursor"></span>
+  </div>
+</div>
+
+<div id="loadingScreen">
+  <span id="loadingText">Loading selected virtual machine</span>
+  <span id="progressBar"></span>
+</div>
+
+<script>
+  // Randomize power draw between 9.3 and 14.9
+  var pw = (9.3 + Math.random() * (14.9 - 9.3)).toFixed(1);
+  document.getElementById('powerDraw').textContent = pw;
+
+  // --- BIOS phase ---
+  setTimeout(function() {
+    document.getElementById('biosTitle2').style.display = 'block';
+  }, 1500);
+
+  const biosIds = ['b1','b2','b3','b4','b5','b6'];
+  biosIds.forEach(function(id, i) {
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      el.style.display = el.tagName === 'TR' ? 'table-row' : 'block';
+    }, 1500 + 800 + i * 500);
+  });
+
+  // After BIOS done, fade out and start main screen
+  var biosTotal = 11000;
+  setTimeout(function() {
+    var bios = document.getElementById('biosScreen');
+    bios.style.transition = 'opacity 0.6s';
+    bios.style.opacity = '0';
+    setTimeout(function() {
+      bios.style.display = 'none';
+      document.getElementById('screen').style.display = 'block';
+      startMainBoot();
+    }, 650);
+  }, biosTotal);
+
+  // --- Main boot phase ---
+  function startMainBoot() {
+    var delays = [0, 400, 700, 950, 1200, 1600, 1700, 1900, 2050, 2200, 2350, 2500, 2650, 2800, 2950, 3100, 3250, 3400];
+    var ids     = ['l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','l11','l12','l13','l14','l15','l16'];
+
+    ids.forEach(function(id, i) {
+      setTimeout(function() {
+        document.getElementById(id).style.display = 'block';
+      }, delays[i + 1]);
+    });
+
+    setTimeout(function() {
+      document.getElementById('inputLine').style.display = 'block';
+      accepting = true;
+    }, delays[delays.length - 1] + 300);
+  }
+
+  let accepting = false;
+
+  function listenKeys() {
+    accepting = true;
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (!accepting) return;
+    if (e.key < '1' || e.key > '9') return;
+
+    accepting = false;
+    const key = e.key;
+    document.getElementById('inputDisplay').textContent = key;
+
+    setTimeout(function() { triggerLoading(key); }, 150);
+  });
+
+  function triggerLoading(key) {
+    document.getElementById('loadingText').textContent =
+      key === '9' ? 'Rebooting system - please wait' : 'Loading selected machine';
+
+    const bar = document.getElementById('progressBar');
+    bar.classList.remove('running');
+    void bar.offsetWidth;
+    bar.classList.add('running');
+
+    const ls = document.getElementById('loadingScreen');
+    ls.style.display = '';
+    ls.classList.remove('hide');
+    ls.classList.add('show');
+
+    setTimeout(function() {
+      ls.classList.add('hide');
+      setTimeout(function() {
+        ls.classList.remove('show', 'hide');
+        ls.style.display = 'none';
+        if (key === '9') {
+          document.body.style.background = '#000';
+          document.getElementById('screen').style.display = 'none';
+          setTimeout(function() { window.location.reload(); }, 3000);
+        } else {
+          resetMenu();
+        }
+      }, 350);
+    }, 3000);
+  }
+
+  function resetMenu() {
+    document.getElementById('inputDisplay').textContent = '';
+    accepting = true;
+  }
+</script>
+</body>
+</html>
