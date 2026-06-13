@@ -115,7 +115,7 @@
 </span><span class="bios-row" id="b3">Memory..................  12 TB ECC                  <span class="bios-ok">OK</span>
 </span><span class="bios-row" id="b4">GPU Cluster.............  4x NVIDIA L40S             <span class="bios-ok">OK</span>
 </span><span class="bios-row" id="b5">Storage Pool............  8.4 PB NVMe                <span class="bios-ok">OK</span>
-</span><span class="bios-row" id="b6">Power Draw..............  <span id="powerDraw"></span> kW                   <span class="bios-ok"> OK</span>
+</span><span class="bios-row" id="b6">Power Draw..............  <span id="powerDraw"></span>  kW                   <span class="bios-ok">OK</span>
 </span>
 </div>
 
@@ -143,6 +143,35 @@
   </div>
 </div>
 
+
+<div id="holyCowScreen" style="display:none;position:fixed;inset:0;background:#000;color:#00e040;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.4;padding:32px 40px;z-index:500;">
+<div style="font-size:22px;font-weight:bold;margin-bottom:24px;">*** HOLY COW ***</div>
+<pre>                          /|                        /|
+                          | \           __ _ _     / ;
+                    ___    \ \   _.-&quot;-&quot; `~&quot;\  `&quot;--' /
+                _.-'   &quot;&quot;-._\ &quot;&quot;   ._,&quot;  ; &quot;\&quot;--._./
+            _.-'       \./    &quot;-&quot;&quot;&quot;, )  ~&quot;  |
+           / ,- .'          ,     '  `o.  ;  )
+           \ ;/       '                 ;   /
+            |/        '      |      \   '   |
+            /        |             J.&quot;\  ,  |
+           &quot;         :       \   .'  : | ,. _)
+           |         |     /     f |  |`--&quot;--'
+            \_        \    \    / _/  |
+             \ &quot;-._  _.|   (   j/; -'/
+              \  | &quot;/  (   |   /,    |
+               | \  |  /\  |\_///   /
+               \ /   \ | \  \  /   /
+                ||    \ \|  |  |  |
+                ||     \ \  |  | /
+                |\      |_|/   ||
+                L \       ||   ||
+                `&quot;'       |\   |\
+                          ( \. \ `.
+                          |_ _\|_ _\
+                            &quot;    &quot;</pre>
+</div>
+
 <div id="loadingScreen">
   <span id="loadingText">Loading selected virtual machine</span>
   <span id="progressBar"></span>
@@ -151,7 +180,7 @@
 <script>
   // Randomize power draw between 9.3 and 14.9
   var pw = (9.3 + Math.random() * (14.9 - 9.3)).toFixed(1);
-  document.getElementById('powerDraw').textContent = pw;
+  document.getElementById('powerDraw').textContent = pw.length < 4 ? pw + ' ' : pw;
 
   // --- BIOS phase ---
   setTimeout(function() {
@@ -202,7 +231,16 @@
     accepting = true;
   }
 
+  var vimBuffer = '';
   document.addEventListener('keydown', function(e) {
+    vimBuffer += e.key;
+    if (vimBuffer.length > 3) vimBuffer = vimBuffer.slice(-3);
+    if (vimBuffer === ':wq') {
+      vimBuffer = '';
+      showHolyCow();
+      return;
+    }
+
     if (!accepting) return;
     if (e.key < '1' || e.key > '9') return;
 
@@ -212,6 +250,14 @@
 
     setTimeout(function() { triggerLoading(key); }, 150);
   });
+
+  function showHolyCow() {
+    var hc = document.getElementById('holyCowScreen');
+    hc.style.display = 'block';
+    setTimeout(function() {
+      hc.style.display = 'none';
+    }, 8000);
+  }
 
   function triggerLoading(key) {
     document.getElementById('loadingText').textContent =
