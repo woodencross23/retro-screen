@@ -138,7 +138,8 @@
   <span class="line" id="l13" style="display:none">7.  Linux tails</span>
   <span class="line" id="l14" style="display:none">8.  UniFiUI maintenance</span>
   <span class="line" id="l15" style="display:none">9.  Reboot client</span>
-  <span class="line" id="l16" style="display:none">&nbsp;</span>
+  <span class="line" id="l16" style="display:none">10. Info (0/I)</span>
+  <span class="line" id="l17" style="display:none">&nbsp;</span>
   <div id="inputLine" style="display:none">
     Select profile: <span id="inputDisplay"></span><span id="cursor"></span>
   </div>
@@ -171,6 +172,11 @@
                           ( \. \ `.
                           |_ _\|_ _\
                             &quot;    &quot;</pre>
+</div>
+
+
+<div id="infoScreen" style="display:none;position:fixed;inset:0;background:#000;color:#00e040;font-family:'Courier New',Courier,monospace;font-size:22px;line-height:1.65;padding:32px 40px;z-index:600;">
+<pre id="infoContent"></pre>
 </div>
 
 <div id="loadingScreen">
@@ -212,7 +218,7 @@
   // --- Main boot phase ---
   function startMainBoot() {
     var delays = [0, 400, 700, 950, 1200, 1600, 1700, 1900, 2050, 2200, 2350, 2500, 2650, 2800, 2950, 3100, 3250, 3400];
-    var ids     = ['l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','l11','l12','l13','l14','l15','l16'];
+    var ids     = ['l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','l11','l12','l13','l14','l15','l16','l17'];
 
     ids.forEach(function(id, i) {
       setTimeout(function() {
@@ -243,13 +249,19 @@
     }
 
     if (!accepting) return;
-    if (e.key < '1' || e.key > '9') return;
+
+    const validKeys = ['1','2','3','4','5','6','7','8','9','0','i','I'];
+    if (!validKeys.includes(e.key)) return;
 
     accepting = false;
     const key = e.key;
-    document.getElementById('inputDisplay').textContent = key;
+    document.getElementById('inputDisplay').textContent = key.toUpperCase();
 
-    setTimeout(function() { triggerLoading(key); }, 150);
+    if (key === '0' || key.toLowerCase() === 'i') {
+      setTimeout(showInfoScreen, 150);
+    } else {
+      setTimeout(function() { triggerLoading(key); }, 150);
+    }
   });
 
   function showHolyCow() {
@@ -258,6 +270,69 @@
     setTimeout(function() {
       hc.style.display = 'none';
     }, 8000);
+  }
+
+
+  function showInfoScreen() {
+    accepting = false;
+
+    const info = document.getElementById('infoScreen');
+    const content = document.getElementById('infoContent');
+
+    let seconds = 15;
+    let copied = false;
+
+    function redraw() {
+      content.textContent =
+        '--- Contact Information ---\n\n' +
+        'root@helpix.de\n\n' +
+        '[C] Copy email to clipboard\n\n' +
+        (copied ? 'Email copied to clipboard.\n\n' : '') +
+        'Returning to main menu in: ' + seconds;
+    }
+
+    redraw();
+    info.style.display = 'block';
+
+function copyHandler(e) {
+    if (e.key && e.key.toLowerCase() === 'c') {
+
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText('root@helpix.de');
+            } else {
+                const temp = document.createElement('textarea');
+                temp.value = 'root@helpix.de';
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
+            }
+
+            copied = true;
+            redraw();
+
+        } catch(err) {
+            console.error(err);
+        }
+    }
+}
+
+    document.addEventListener('keydown', copyHandler);
+
+    const timer = setInterval(function() {
+      seconds--;
+
+      if (seconds <= 0) {
+        clearInterval(timer);
+        document.removeEventListener('keydown', copyHandler);
+        info.style.display = 'none';
+        resetMenu();
+        return;
+      }
+
+      redraw();
+    }, 1000);
   }
 
   function triggerLoading(key) {
