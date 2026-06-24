@@ -1,374 +1,170 @@
-
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="author" content="wooden (root@localhost:~#) - Solving problems since C64 BASIC. Physics, Linux and a healthy distrust of rebooting." />
-  <title>F.U.C.K.U.P Mainframe</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
-      background: #000;
-      color: #00e040;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 22px;
-      line-height: 1.65;
-      padding: 32px 40px;
-      cursor: default;
-      user-select: none;
-    }
-
-    #screen { max-width: 900px; }
-
-    .line { display: block; white-space: pre; }
-
-    /* Cursor blink */
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-    #cursor {
-      display: inline-block;
-      width: 14px;
-      height: 0.85em;
-      background: #00e040;
-      vertical-align: middle;
-      position: relative;
-      top: -0.05em;
-      animation: blink 1s step-end infinite;
-    }
-
-    /* Loading fade */
-    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
-    @keyframes fadeOut { from{opacity:1} to{opacity:0} }
-    #loadingScreen {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: #000;
-      color: #00e040;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 22px;
-      align-items: center;
-      justify-content: center;
-    }
-    #loadingScreen.show {
-      display: flex;
-      animation: fadeIn 0.3s ease;
-    }
-    #loadingScreen.hide {
-      animation: fadeOut 0.3s ease forwards;
-    }
-
-    /* Progress bar */
-    #loadingScreen { flex-direction: column; gap: 18px; }
-    @keyframes progress {
-      0%   { content: '[                    ]'; }
-      5%   { content: '[>                   ]'; }
-      10%  { content: '[=>                  ]'; }
-      15%  { content: '[==>                 ]'; }
-      20%  { content: '[===>                ]'; }
-      25%  { content: '[====>               ]'; }
-      30%  { content: '[=====>              ]'; }
-      35%  { content: '[======>             ]'; }
-      40%  { content: '[=======>            ]'; }
-      45%  { content: '[========>           ]'; }
-      50%  { content: '[=========>          ]'; }
-      55%  { content: '[==========>         ]'; }
-      60%  { content: '[===========>        ]'; }
-      65%  { content: '[============>       ]'; }
-      70%  { content: '[=============>      ]'; }
-      75%  { content: '[==============>     ]'; }
-      80%  { content: '[===============>    ]'; }
-      85%  { content: '[================>   ]'; }
-      90%  { content: '[=================>  ]'; }
-      95%  { content: '[==================> ]'; }
-      100% { content: '[====================]'; }
-    }
-    #progressBar::before {
-      content: '[                    ]';
-      white-space: pre;
-    }
-    #progressBar.running::before {
-      animation: progress 3s linear forwards;
-    }
-
-
-    /* BIOS screen */
-    .bios-row { display: none; white-space: pre; line-height: 1.65; }
-    tr.bios-row { display: none; }
-    tr.bios-row.visible { display: table-row; }
-    .bios-ok  { color: #00e040; }
-    .bios-title { font-size: 26px; font-weight: bold; margin-bottom: 20px; letter-spacing: 0.05em; }
-    #inputLine { margin-top: 8px; }
-    #inputDisplay { display: inline; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F.U.C.K.U.P Mainframe v2.1 Terminal Edition</title>
+<style>
+html,body{height:100%;margin:0;background:#000;color:#00e040;font-family:"Courier New",monospace;font-size:22px;line-height:1.6}
+#screen{padding:32px 40px;white-space:pre-wrap}
+#hiddenInput{position:absolute;left:-9999px;opacity:0}
+@keyframes blink{50%{opacity:0}}
+.cursor{animation:blink 1s step-end infinite}
+</style>
 </head>
 <body>
-
-<!-- BIOS Boot Screen -->
-<div id="biosScreen">
-  <div class="bios-title" id="biosTitle1">--- Chiquita Client v1.7 ---<br><br>Handshake to mainframe... OK<br>Initializing remote session...</div>
-  <div class="bios-title" id="biosTitle2" style="display:none">[Connection established]</div>
-  <span class="bios-row" id="b1">Mainboard...............  Supermicro X13QH-T         <span class="bios-ok">OK</span>
-</span><span class="bios-row" id="b2">CPU.....................  4x Xeon Platinum           <span class="bios-ok">OK</span>
-</span><span class="bios-row" id="b3">Memory..................  12 TB ECC                  <span class="bios-ok">OK</span>
-</span><span class="bios-row" id="b4">GPU Cluster.............  4x NVIDIA L40S             <span class="bios-ok">OK</span>
-</span><span class="bios-row" id="b5">Storage Pool............  8.4 PB NVMe                <span class="bios-ok">OK</span>
-</span><span class="bios-row" id="b6">Power Draw..............  <span id="powerDraw"></span>  kW                   <span class="bios-ok">OK</span>
-</span>
-</div>
-
-<div id="screen" style="display:none">
-  <span class="line">--- F.U.C.K.U.P Mainframe v1.4.02 ---</span>
-  <span class="line">&nbsp;</span>
-  <span class="line" id="l1" style="display:none">Initializing distributed compute fabric...</span>
-  <span class="line" id="l2" style="display:none">Checking storage pools... OK</span>
-  <span class="line" id="l3" style="display:none">Mounting VM snapshots... OK</span>
-  <span class="line" id="l4" style="display:none">Negotiating GPU partitions... OK</span>
-  <span class="line" id="l5" style="display:none">&nbsp;</span>
-  <span class="line" id="l6" style="display:none">Choose your machine:</span>
-  <span class="line" id="l7"  style="display:none">1.  Win11 shooter gaming    (low ping)</span>
-  <span class="line" id="l8"  style="display:none">2.  Win11 graphics gaming   (max GPU)</span>
-  <span class="line" id="l9"  style="display:none">3.  Win11 average use</span>
-  <span class="line" id="l10" style="display:none">4.  MacOS cutting/editing</span>
-  <span class="line" id="l11" style="display:none">5.  Linux arch</span>
-  <span class="line" id="l12" style="display:none">6.  Linux debian</span>
-  <span class="line" id="l13" style="display:none">7.  Linux tails</span>
-  <span class="line" id="l14" style="display:none">8.  UniFiUI maintenance</span>
-  <span class="line" id="l15" style="display:none">9.  Reboot client</span>
-  <span class="line" id="l16" style="display:none">10. Info (0/I)</span>
-  <span class="line" id="l17" style="display:none">&nbsp;</span>
-  <div id="inputLine" style="display:none">
-    Select profile: <span id="inputDisplay"></span><span id="cursor"></span>
-  </div>
-</div>
-
-
-<div id="holyCowScreen" style="display:none;position:fixed;inset:0;background:#000;color:#00e040;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.4;padding:32px 40px;z-index:500;">
-<div style="font-size:22px;font-weight:bold;margin-bottom:24px;">*** HOLY COW ***</div>
-<pre>                          /|                        /|
-                          | \           __ _ _     / ;
-                    ___    \ \   _.-&quot;-&quot; `~&quot;\  `&quot;--' /
-                _.-'   &quot;&quot;-._\ &quot;&quot;   ._,&quot;  ; &quot;\&quot;--._./
-            _.-'       \./    &quot;-&quot;&quot;&quot;, )  ~&quot;  |
-           / ,- .'          ,     '  `o.  ;  )
-           \ ;/       '                 ;   /
-            |/        '      |      \   '   |
-            /        |             J.&quot;\  ,  |
-           &quot;         :       \   .'  : | ,. _)
-           |         |     /     f |  |`--&quot;--'
-            \_        \    \    / _/  |
-             \ &quot;-._  _.|   (   j/; -'/
-              \  | &quot;/  (   |   /,    |
-               | \  |  /\  |\_///   /
-               \ /   \ | \  \  /   /
-                ||    \ \|  |  |  |
-                ||     \ \  |  | /
-                |\      |_|/   ||
-                L \       ||   ||
-                `&quot;'       |\   |\
-                          ( \. \ `.
-                          |_ _\|_ _\
-                            &quot;    &quot;</pre>
-</div>
-
-
-<div id="infoScreen" style="display:none;position:fixed;inset:0;background:#000;color:#00e040;font-family:'Courier New',Courier,monospace;font-size:22px;line-height:1.65;padding:32px 40px;z-index:600;">
-<pre id="infoContent"></pre>
-</div>
-
-<div id="loadingScreen">
-  <span id="loadingText">Loading selected virtual machine</span>
-  <span id="progressBar"></span>
-</div>
+<input id="hiddenInput" type="text" autocapitalize="off" autocomplete="off" spellcheck="false">
+<div id="screen"></div>
 
 <script>
-  // Randomize power draw between 9.3 and 14.9
-  var pw = (9.3 + Math.random() * (14.9 - 9.3)).toFixed(1);
-  document.getElementById('powerDraw').textContent = pw.length < 4 ? pw + ' ' : pw;
+const screen=document.getElementById('screen');
+const hidden=document.getElementById('hiddenInput');
 
-  // --- BIOS phase ---
-  setTimeout(function() {
-    document.getElementById('biosTitle2').style.display = 'block';
-  }, 1500);
+let history=[],historyPos=0,current='';
 
-  const biosIds = ['b1','b2','b3','b4','b5','b6'];
-  biosIds.forEach(function(id, i) {
-    setTimeout(function() {
-      var el = document.getElementById(id);
-      el.style.display = el.tagName === 'TR' ? 'table-row' : 'block';
-    }, 1500 + 800 + i * 500);
-  });
+function focusInput(){hidden.focus();}
+document.addEventListener('click',focusInput);
 
-  // After BIOS done, fade out and start main screen
-  var biosTotal = 11000;
-  setTimeout(function() {
-    var bios = document.getElementById('biosScreen');
-    bios.style.transition = 'opacity 0.6s';
-    bios.style.opacity = '0';
-    setTimeout(function() {
-      bios.style.display = 'none';
-      document.getElementById('screen').style.display = 'block';
-      startMainBoot();
-    }, 650);
-  }, biosTotal);
-
-  // --- Main boot phase ---
-  function startMainBoot() {
-    var delays = [0, 400, 700, 950, 1200, 1600, 1700, 1900, 2050, 2200, 2350, 2500, 2650, 2800, 2950, 3100, 3250, 3400];
-    var ids     = ['l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','l11','l12','l13','l14','l15','l16','l17'];
-
-    ids.forEach(function(id, i) {
-      setTimeout(function() {
-        document.getElementById(id).style.display = 'block';
-      }, delays[i + 1]);
-    });
-
-    setTimeout(function() {
-      document.getElementById('inputLine').style.display = 'block';
-      accepting = true;
-    }, delays[delays.length - 1] + 300);
-  }
-
-  let accepting = false;
-
-  function listenKeys() {
-    accepting = true;
-  }
-
-  var vimBuffer = '';
-  document.addEventListener('keydown', function(e) {
-    vimBuffer += e.key;
-    if (vimBuffer.length > 3) vimBuffer = vimBuffer.slice(-3);
-    if (vimBuffer === ':wq') {
-      vimBuffer = '';
-      showHolyCow();
-      return;
-    }
-
-    if (!accepting) return;
-
-    const validKeys = ['1','2','3','4','5','6','7','8','9','0','i','I'];
-    if (!validKeys.includes(e.key)) return;
-
-    accepting = false;
-    const key = e.key;
-    document.getElementById('inputDisplay').textContent = key.toUpperCase();
-
-    if (key === '0' || key.toLowerCase() === 'i') {
-      setTimeout(showInfoScreen, 150);
-    } else {
-      setTimeout(function() { triggerLoading(key); }, 150);
-    }
-  });
-
-  function showHolyCow() {
-    var hc = document.getElementById('holyCowScreen');
-    hc.style.display = 'block';
-    setTimeout(function() {
-      hc.style.display = 'none';
-    }, 8000);
-  }
-
-
-  function showInfoScreen() {
-    accepting = false;
-
-    const info = document.getElementById('infoScreen');
-    const content = document.getElementById('infoContent');
-
-    let seconds = 15;
-    let copied = false;
-
-    function redraw() {
-      content.textContent =
-        '--- Contact Information ---\n\n' +
-        'root@helpix.de\n\n' +
-        '[C] Copy email to clipboard\n\n' +
-        (copied ? 'Email copied to clipboard.\n\n' : '') +
-        'Returning to main menu in: ' + seconds;
-    }
-
-    redraw();
-    info.style.display = 'block';
-
-function copyHandler(e) {
-    if (e.key && e.key.toLowerCase() === 'c') {
-
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText('root@helpix.de');
-            } else {
-                const temp = document.createElement('textarea');
-                temp.value = 'root@helpix.de';
-                document.body.appendChild(temp);
-                temp.select();
-                document.execCommand('copy');
-                document.body.removeChild(temp);
-            }
-
-            copied = true;
-            redraw();
-
-        } catch(err) {
-            console.error(err);
-        }
-    }
+function rebootSequence(){
+screen.textContent='--- Chiquita Client v1.8.2 ---\n\nHandshake to mainframe... OK\nInitializing remote session...';
+setTimeout(()=>screen.textContent+='\n\n[Connection established]',1500);
+setTimeout(()=>screen.textContent+='\nMainboard............... Supermicro X13QH-T  OK',2500);
+setTimeout(()=>screen.textContent+='\nCPU..................... 4x Xeon Platinum OK',3000);
+setTimeout(()=>screen.textContent+='\nMemory.................. 12 TB ECC OK',3500);
+setTimeout(()=>screen.textContent+='\nGPU Cluster............. 4x NVIDIA L40S OK',4000);
+setTimeout(()=>screen.textContent+='\nStorage Pool............ 8.4 PB NVMe OK',4500);
+setTimeout(()=>screen.textContent+='\nPower Draw.............. '+(9.3+Math.random()*5.6).toFixed(1)+' kW OK',5000);
+setTimeout(showTerminal,6500);
 }
 
-    document.addEventListener('keydown', copyHandler);
+function menuText(){
+return `--- F.U.C.K.U.P Mainframe v2.1 ---
 
-    const timer = setInterval(function() {
-      seconds--;
+Choose your machine:
 
-      if (seconds <= 0) {
-        clearInterval(timer);
-        document.removeEventListener('keydown', copyHandler);
-        info.style.display = 'none';
-        resetMenu();
-        return;
-      }
+1. Win11 shooter gaming (low ping)
+2. Win11 graphics gaming (max GPU)
+3. Win11 average use
+4. MacOS cutting/editing
+5. Linux arch
+6. Linux debian
+7. Linux tails
+8. UniFiUI maintenance
+9. Reboot client
 
-      redraw();
-    }, 1000);
-  }
+client1337@mainframe:~# ${current}_`;
+}
 
-  function triggerLoading(key) {
-    document.getElementById('loadingText').textContent =
-      key === '9' ? 'Rebooting system - please wait' : 'Loading selected machine';
+function showTerminal(){screen.textContent=menuText();}
 
-    const bar = document.getElementById('progressBar');
-    bar.classList.remove('running');
-    void bar.offsetWidth;
-    bar.classList.add('running');
+function render(){screen.textContent=menuText();}
 
-    const ls = document.getElementById('loadingScreen');
-    ls.style.display = '';
-    ls.classList.remove('hide');
-    ls.classList.add('show');
+function loading(name){
+let p=0;
+const t=setInterval(()=>{
+p+=5;
+const bar='['+'='.repeat(p/5)+' '.repeat(20-p/5)+']';
+screen.textContent='Loading '+name+'\n\n'+bar;
+if(p>=100){clearInterval(t);setTimeout(render,500);}
+},120);
+}
 
-    setTimeout(function() {
-      ls.classList.add('hide');
-      setTimeout(function() {
-        ls.classList.remove('show', 'hide');
-        ls.style.display = 'none';
-        if (key === '9') {
-          document.body.style.background = '#000';
-          document.getElementById('screen').style.display = 'none';
-          setTimeout(function() { window.location.reload(); }, 3000);
-        } else {
-          resetMenu();
-        }
-      }, 350);
-    }, 3000);
-  }
+function holyCow(){
+screen.textContent=`*** HOLY COW ***
 
-  function resetMenu() {
-    document.getElementById('inputDisplay').textContent = '';
-    accepting = true;
-  }
+Moooo!
+
+                          /|                        /|
+                          | \\           __ _ _     / ;
+                    ___    \\ \\   _.-"-" ~"\\  "--' /
+                _.-'   ""-._\\ ""   ._,"  ; "--._./
+            _.-'       \\./    "-""", )  ~"  |
+           / ,- .'          ,     '  o.  ;  )
+           \\ ;/       '                 ;   /
+            |/        '      |      \\   '   |
+            /        |             J."\\  ,  |
+           "         :       \\   .'  : | ,. _)
+           |         |     /     f |  |--"--'
+            \\_        \\    \\    / _/  |
+             \\ "-._  _.|   (   j/; -'/
+              \\  | "/  (   |   /,    |
+               | \\  |  /\\  |\\_///   /
+               \\ /   \\ | \\  \\  /   /
+                ||    \\ \\|  |  |  |
+                ||     \\ \\  |  | /
+                |\\      |_|/   ||
+                L \\       ||   ||
+                "'"       |\\   |\\
+                          ( \\. \\ .
+                          |_ _\\|_ _\\
+                            "    "`;
+setTimeout(render,8000);
+}
+
+function infoScreen(){
+let sec=15;
+function draw(msg=''){
+screen.textContent='--- Contact Information ---\n\nroot@helpix.de\n\n[C] Copy email to clipboard\n\n'+msg+'\nReturning to main menu in: '+sec;
+}
+draw('');
+
+function copyHandler(e){
+if(e.key.toLowerCase()==='c'){
+try{
+if(navigator.clipboard && navigator.clipboard.writeText){
+navigator.clipboard.writeText('root@helpix.de');
+}else{
+const ta=document.createElement('textarea');
+ta.value='root@helpix.de';
+document.body.appendChild(ta);
+ta.select();
+document.execCommand('copy');
+document.body.removeChild(ta);
+}
+draw('Email copied to clipboard.\n');
+}catch(err){draw('Clipboard unavailable.\n');}
+}
+}
+document.addEventListener('keydown',copyHandler);
+
+const timer=setInterval(()=>{
+sec--;
+draw('');
+if(sec<=0){
+clearInterval(timer);
+document.removeEventListener('keydown',copyHandler);
+render();
+}
+},1000);
+}
+
+function execute(cmd){
+history.push(cmd); historyPos=history.length;
+
+if(
+   cmd==='10' ||
+   cmd==='I' ||
+   cmd==='i' ||
+   cmd.toLowerCase()==='info'
+){infoScreen();return;}
+if(cmd===':wq'){holyCow();return;}
+if(cmd==='9'||cmd.toLowerCase()==='reboot'){rebootSequence();return;}
+if(/^[1-8]$/.test(cmd)){loading('selected machine');return;}
+render();
+}
+
+document.addEventListener('keydown',e=>{
+if(screen.textContent.includes('Contact Information')) return;
+
+if(e.key==='Enter'){const cmd=current.trim(); current=''; execute(cmd); return;}
+if(e.key==='Backspace'){current=current.slice(0,-1); render(); return;}
+if(e.key==='ArrowUp'){if(historyPos>0)historyPos--; current=history[historyPos]||''; render(); return;}
+if(e.key==='ArrowDown'){if(historyPos<history.length-1)historyPos++; current=history[historyPos]||''; render(); return;}
+if(e.key.length===1){current+=e.key; render();}
+});
+
+focusInput();
+rebootSequence();
 </script>
 </body>
 </html>
