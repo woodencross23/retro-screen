@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="wooden (root@localhost:~#) - Solving problems since C64 BASIC. Physics, Linux and a healthy distrust of rebooting." />
 <title>F.U.C.K.U.P Mainframe v2.1 Terminal Edition</title>
 <style>
-html,body{height:100%;margin:0;background:#000;color:#00e040;font-family:"Courier New",monospace;font-size:22px;line-height:1.6}
+html,body{height:100%;margin:0;background:#000;color:#00e040;font-family:"Courier New",monospace;font-size:22px;line-height:1.15}
 #screen{padding:32px 40px;white-space:pre-wrap}
 #hiddenInput{position:absolute;left:-9999px;opacity:0}
 @keyframes blink{50%{opacity:0}}
@@ -34,7 +35,7 @@ setTimeout(()=>screen.textContent+='\nMemory.................. 12 TB ECC OK',350
 setTimeout(()=>screen.textContent+='\nGPU Cluster............. 4x NVIDIA L40S OK',4000);
 setTimeout(()=>screen.textContent+='\nStorage Pool............ 8.4 PB NVMe OK',4500);
 setTimeout(()=>screen.textContent+='\nPower Draw.............. '+(9.3+Math.random()*5.6).toFixed(1)+' kW OK',5000);
-setTimeout(showTerminal,6500);
+setTimeout(showTerminal,7700);
 }
 
 function menuText(){
@@ -42,8 +43,8 @@ return `--- F.U.C.K.U.P Mainframe v2.1 ---
 
 Choose your machine:
 
-1. Win11 shooter gaming (low ping)
-2. Win11 graphics gaming (max GPU)
+1. Win11 shooter (low ping)
+2. Win11 graphics (max GPU)
 3. Win11 average use
 4. MacOS cutting/editing
 5. Linux arch
@@ -101,15 +102,29 @@ Moooo!
 setTimeout(render,8000);
 }
 
+let infoActive=false;
+
 function infoScreen(){
+infoActive=true;
 let sec=15;
-function draw(msg=''){
-screen.textContent='--- Contact Information ---\n\nroot@helpix.de\n\n[C] Copy email to clipboard\n\n'+msg+'\nReturning to main menu in: '+sec;
+let status='';
+
+function draw(){
+screen.textContent='- Contact Information -\n\nroot@helpix.de\n\n[C] Copy email to clipboard\n\n'+status+'\nReturning to main menu in: '+sec;
 }
-draw('');
+
+function closeInfo(){
+infoActive=false;
+document.removeEventListener('keydown', copyHandler, true);
+render();
+focusInput();
+}
 
 function copyHandler(e){
-if(e.key.toLowerCase()==='c'){
+if(!infoActive) return;
+e.stopPropagation();
+
+if(e.key && e.key.toLowerCase()==='c'){
 try{
 if(navigator.clipboard && navigator.clipboard.writeText){
 navigator.clipboard.writeText('root@helpix.de');
@@ -121,19 +136,25 @@ ta.select();
 document.execCommand('copy');
 document.body.removeChild(ta);
 }
-draw('Email copied to clipboard.\n');
-}catch(err){draw('Clipboard unavailable.\n');}
+status='Email copied to clipboard.';
+draw();
+}catch(err){
+status='Clipboard unavailable.';
+draw();
 }
 }
-document.addEventListener('keydown',copyHandler);
+}
+
+document.addEventListener('keydown', copyHandler, true);
+draw();
 
 const timer=setInterval(()=>{
+if(!infoActive){ clearInterval(timer); return; }
 sec--;
-draw('');
+draw();
 if(sec<=0){
 clearInterval(timer);
-document.removeEventListener('keydown',copyHandler);
-render();
+closeInfo();
 }
 },1000);
 }
@@ -153,8 +174,27 @@ if(/^[1-8]$/.test(cmd)){loading('selected machine');return;}
 render();
 }
 
+
+hidden.addEventListener('input', ()=>{
+  current = hidden.value;
+  render();
+});
+
+hidden.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const cmd = hidden.value.trim();
+    hidden.value='';
+    current='';
+    execute(cmd);
+    return;
+  }
+});
+
+
 document.addEventListener('keydown',e=>{
-if(screen.textContent.includes('Contact Information')) return;
+if(document.activeElement===hidden && e.key==='Enter') return;
+if(infoActive) return;
 
 if(e.key==='Enter'){const cmd=current.trim(); current=''; execute(cmd); return;}
 if(e.key==='Backspace'){current=current.slice(0,-1); render(); return;}
