@@ -106,6 +106,8 @@ let infoActive=false;
 
 function infoScreen(){
 infoActive=true;
+hidden.value='';
+current='';
 let sec=15;
 let status='';
 
@@ -123,6 +125,7 @@ focusInput();
 function copyHandler(e){
 if(!infoActive) return;
 e.stopPropagation();
+e.preventDefault();
 
 if(e.key && e.key.toLowerCase()==='c'){
 try{
@@ -176,6 +179,10 @@ render();
 
 
 hidden.addEventListener('input', ()=>{
+  if(infoActive){
+    hidden.value='';
+    return;
+  }
   current = hidden.value;
   render();
 });
