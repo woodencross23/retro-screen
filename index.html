@@ -22,11 +22,53 @@ const screen=document.getElementById('screen');
 const hidden=document.getElementById('hiddenInput');
 
 let history=[],historyPos=0,current='';
+let inputLocked=false;
+
+const commands={
+"rm -rf *":`Nice try.
+
+Filesystem is read-only.
+Your actions have been reported to the cow.`,
+"rm -rf /":`Segmentation fault.
+Cow dumped.`,
+"uptime":`Born: late 1970s
+First computer: C64 (1984)
+Current OS: Debian Linux
+Status: still debugging`,
+"help":`Welcome to linux: There's no help, just endless man pages and your despair.`,
+"logout":`Deckard Cain wants you to stay awhile and listen.`,
+"exit":`Deckard Cain wants you to stay awhile and listen.`,
+"man":`You don't need this.`
+};
+
+function commandOutput(cmd,text){
+screen.textContent=`--- F.U.C.K.U.P Mainframe v2.1 ---
+
+Choose your machine:
+
+1. Win11 shooter (low ping)
+2. Win11 graphics (max GPU)
+3. Win11 average use
+4. MacOS cutting/editing
+5. Linux arch
+6. Linux debian
+7. Linux tails
+8. UniFiUI maintenance
+9. Reboot client
+
+client1337@mainframe:~# ${cmd}
+
+${text}
+
+client1337@mainframe:~# _`;
+}
+
 
 function focusInput(){hidden.focus();}
 document.addEventListener('click',focusInput);
 
 function rebootSequence(){
+inputLocked=true;
 screen.textContent='--- Chiquita Client v1.8.2 ---\n\nHandshake to mainframe... OK\nInitializing remote session...';
 setTimeout(()=>screen.textContent+='\n\n[Connection established]',1500);
 setTimeout(()=>screen.textContent+='\nMainboard............... Supermicro X13QH-T  OK',2500);
@@ -35,7 +77,7 @@ setTimeout(()=>screen.textContent+='\nMemory.................. 12 TB ECC OK',350
 setTimeout(()=>screen.textContent+='\nGPU Cluster............. 4x NVIDIA L40S OK',4000);
 setTimeout(()=>screen.textContent+='\nStorage Pool............ 8.4 PB NVMe OK',4500);
 setTimeout(()=>screen.textContent+='\nPower Draw.............. '+(9.3+Math.random()*5.6).toFixed(1)+' kW OK',5000);
-setTimeout(showTerminal,7700);
+setTimeout(()=>{inputLocked=false;showTerminal();},7700);
 }
 
 function menuText(){
@@ -61,12 +103,13 @@ function showTerminal(){screen.textContent=menuText();}
 function render(){screen.textContent=menuText();}
 
 function loading(name){
+inputLocked=true;
 let p=0;
 const t=setInterval(()=>{
 p+=5;
 const bar='['+'='.repeat(p/5)+' '.repeat(20-p/5)+']';
 screen.textContent='Loading '+name+'\n\n'+bar;
-if(p>=100){clearInterval(t);setTimeout(render,500);}
+if(p>=100){clearInterval(t);setTimeout(()=>{inputLocked=false;render();},500);}
 },120);
 }
 
@@ -171,6 +214,12 @@ if(
    cmd==='i' ||
    cmd.toLowerCase()==='info'
 ){infoScreen();return;}
+const normalized=cmd.trim().toLowerCase();
+if(commands[normalized]){
+commandOutput(cmd,commands[normalized]);
+return;
+}
+
 if(cmd===':wq'){holyCow();return;}
 if(cmd==='9'||cmd.toLowerCase()==='reboot'){rebootSequence();return;}
 if(/^[1-8]$/.test(cmd)){loading('selected machine');return;}
@@ -179,7 +228,7 @@ render();
 
 
 hidden.addEventListener('input', ()=>{
-  if(infoActive){
+  if(infoActive || inputLocked){
     hidden.value='';
     return;
   }
@@ -188,6 +237,7 @@ hidden.addEventListener('input', ()=>{
 });
 
 hidden.addEventListener('keydown', (e)=>{
+  if(inputLocked){ e.preventDefault(); return; }
   if(e.key==='Enter'){
     e.preventDefault();
     const cmd = hidden.value.trim();
@@ -201,7 +251,7 @@ hidden.addEventListener('keydown', (e)=>{
 
 document.addEventListener('keydown',e=>{
 if(document.activeElement===hidden && e.key==='Enter') return;
-if(infoActive) return;
+if(infoActive || inputLocked) return;
 
 if(e.key==='Enter'){const cmd=current.trim(); current=''; execute(cmd); return;}
 if(e.key==='Backspace'){current=current.slice(0,-1); render(); return;}
