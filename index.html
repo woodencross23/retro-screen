@@ -48,7 +48,19 @@ Cow dumped.`,
 First computer: C64 (1984)
 Current OS: debian linux
 Status: still debugging`,
-"help":`Welcome to linux: there's no help, just endless man pages and your despair.`,
+"help":`Available commands:
+
+help
+man
+info
+uptime
+fortune
+matrix
+sl
+cowsay
+sudo
+logout
+exit`,
 "logout":`Deckard Cain wants you to stay awhile and listen.`,
 "exit":`Deckard Cain wants you to stay awhile and listen.`,
 "man":`You don't need this.`
@@ -376,8 +388,8 @@ if(infoActive || inputLocked) return;
 
 if(e.key==='Enter'){const cmd=current.trim(); current=''; execute(cmd); return;}
 if(e.key==='Backspace'){current=current.slice(0,-1); render(); return;}
-if(e.key==='ArrowUp'){if(historyPos>0)historyPos--; current=history[historyPos]||''; render(); return;}
-if(e.key==='ArrowDown'){if(historyPos<history.length-1)historyPos++; current=history[historyPos]||''; render(); return;}
+if(e.key==='ArrowUp'){if(historyPos>0)historyPos--; current=history[historyPos]||''; hidden.value=current; render(); return;}
+if(e.key==='ArrowDown'){if(historyPos<history.length-1)historyPos++; current=history[historyPos]||''; hidden.value=current; render(); return;}
 if(e.key.length===1){current+=e.key; render();}
 });
 
