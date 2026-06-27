@@ -51,8 +51,23 @@ Status: still debugging`,
 "help":`Welcome to linux: there's no help, just endless man pages and your despair.`,
 "logout":`Deckard Cain wants you to stay awhile and listen.`,
 "exit":`Deckard Cain wants you to stay awhile and listen.`,
-"man":`You don't need this.`
+"man":`You don't need this.`,
+"sudo":`[sudo] password for client1337: 
+Nice try. This terminal runs on trust issues, not sudoers.`
 };
+
+const fortunes=[
+"You will soon encounter a kernel panic. Or lunch. Hard to tell.",
+"A watched process never reboots faster.",
+"Beware of the IT guy bearing 'quick fixes'.",
+"Your uptime will outlast your patience.",
+"Init 0 is not a personality, but it's a start.",
+"The cow says: invest in ECC RAM.",
+"You will fix one bug and create two. Standard exchange rate.",
+"root is calling from inside the house.",
+"Confucius says: he who reboots first, loses the argument.",
+"A clean log is a lying log."
+];
 
 function commandOutput(cmd,text){
 screen.textContent=`--- F.U.C.K.U.P Mainframe v2.4 ---
@@ -76,9 +91,57 @@ ${text}
 client1337@mainframe:~# _`;
 }
 
+function fortuneOutput(cmd){
+const pick=fortunes[Math.floor(Math.random()*fortunes.length)];
+commandOutput(cmd,pick);
+}
+
 
 function focusInput(){hidden.focus();}
 document.addEventListener('click',focusInput);
+
+function slTrain(){
+inputLocked=true;
+const train=[
+"      ====        ________                ___________ ",
+"  _D _|  |_______/        \\__I_I_____===__|_________| ",
+"   |(_)---  |   H\\________/ |   |        =|___ ___|   ",
+"   /     |  |   H  |  |     |   |         ||_| |_||   ",
+"  |      |  |   H  |__--------------------| [___] |   ",
+"  | ________|___H__/__|_____/[][]~\\_______|       |   ",
+"  |/ |   |-----------I_____I [][] []  D   |=======|__ "
+];
+let pos=20;
+const frame=train.map(l=>' '.repeat(Math.max(pos,0))+l).join('\n');
+screen.textContent=frame;
+const t=setInterval(()=>{
+pos-=2;
+if(pos< -60){clearInterval(t);inputLocked=false;render();return;}
+screen.textContent=train.map(l=>' '.repeat(Math.max(pos,0))+l).join('\n');
+},60);
+}
+
+function matrixRain(){
+inputLocked=true;
+const cols=40,rows=18;
+const chars='01アイウエオカキクケコサシスセソ';
+const drops=Array(cols).fill(0).map(()=>Math.floor(Math.random()*rows));
+let ticks=0;
+const t=setInterval(()=>{
+ticks++;
+let out='';
+for(let r=0;r<rows;r++){
+let line='';
+for(let c=0;c<cols;c++){
+line+= (drops[c]===r) ? chars[Math.floor(Math.random()*chars.length)] : (Math.random()<0.02?chars[Math.floor(Math.random()*chars.length)]:' ');
+}
+out+=line+'\n';
+}
+screen.textContent=out;
+for(let c=0;c<cols;c++){drops[c]=(drops[c]+1+Math.floor(Math.random()*2))%rows;}
+if(ticks>=70){clearInterval(t);inputLocked=false;render();}
+},60);
+}
 
 function rebootSequence(){
 inputLocked=true;
@@ -156,6 +219,37 @@ Moooo!
                           |_ _\\|_ _\\
                             "    "`;
 setTimeout(render,8000);
+}
+
+function cowsayOutput(text){
+const msg=text&&text.trim()?text.trim():'Moo.';
+const maxLen=40;
+const lines=[];
+let line='';
+msg.split(' ').forEach(word=>{
+if((line+' '+word).trim().length>maxLen){lines.push(line.trim());line=word;}
+else{line=(line+' '+word).trim();}
+});
+if(line)lines.push(line);
+
+const width=Math.max(...lines.map(l=>l.length));
+const top=' '+'_'.repeat(width+2);
+const bottom=' '+'-'.repeat(width+2);
+const body=lines.map((l,i)=>{
+const pad=l+' '.repeat(width-l.length);
+const left=lines.length===1?'<':(i===0?'/':(i===lines.length-1?'\\':'|'));
+const right=lines.length===1?'>':(i===0?'\\':(i===lines.length-1?'/':'|'));
+return left+' '+pad+' '+right;
+}).join('\n');
+
+const cow=`
+        \\   ^__^
+         \\  (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||`;
+
+commandOutput('cowsay '+msg, top+'\n'+body+'\n'+bottom+cow);
 }
 
 let infoActive=false;
@@ -236,6 +330,17 @@ return;
 if(cmd===':wq'){holyCow();return;}
 if(cmd==='9'||cmd.toLowerCase()==='reboot'){rebootSequence();return;}
 if(/^[1-8]$/.test(cmd)){loading('selected machine');return;}
+
+if(normalized==='sl'){slTrain();return;}
+if(normalized==='matrix'){matrixRain();return;}
+if(normalized==='fortune'){fortuneOutput(cmd);return;}
+if(/^sudo\s+/i.test(cmd.trim())){commandOutput(cmd,commands['sudo']);return;}
+if(/^cowsay(\s+|$)/i.test(cmd.trim())){
+const text=cmd.trim().replace(/^cowsay\s*/i,'');
+cowsayOutput(text);
+return;
+}
+
 render();
 }
 
