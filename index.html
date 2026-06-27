@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="wooden (root@localhost:~#) - Solving problems since C64 BASIC. Physics, Linux and a healthy distrust of rebooting." />
-<title>F.U.C.K.U.P Mainframe v2.1 Terminal Edition</title>
+<title>F.U.C.K.U.P Mainframe v2.4 Terminal Edition</title>
 <style>
 html,body{height:100%;margin:0;background:#000;color:#00e040;font-family:"Courier New",monospace;font-size:22px;line-height:1.15}
 #screen{padding:32px 40px;white-space:pre-wrap}
@@ -33,16 +33,16 @@ Your actions have been reported to the cow.`,
 Cow dumped.`,
 "uptime":`Born: late 1970s
 First computer: C64 (1984)
-Current OS: Debian Linux
+Current OS: debian linux
 Status: still debugging`,
-"help":`Welcome to linux: There's no help, just endless man pages and your despair.`,
+"help":`Welcome to linux: there's no help, just endless man pages and your despair.`,
 "logout":`Deckard Cain wants you to stay awhile and listen.`,
 "exit":`Deckard Cain wants you to stay awhile and listen.`,
 "man":`You don't need this.`
 };
 
 function commandOutput(cmd,text){
-screen.textContent=`--- F.U.C.K.U.P Mainframe v2.1 ---
+screen.textContent=`--- F.U.C.K.U.P Mainframe v2.4 ---
 
 Choose your machine:
 
@@ -69,7 +69,7 @@ document.addEventListener('click',focusInput);
 
 function rebootSequence(){
 inputLocked=true;
-screen.textContent='--- Chiquita Client v1.8.2 ---\n\nHandshake to mainframe... OK\nInitializing remote session...';
+screen.textContent='--- Chiquita Client v1.9.4 ---\n\nHandshake to mainframe... OK\nInitializing remote session...';
 setTimeout(()=>screen.textContent+='\n\n[Connection established]',1500);
 setTimeout(()=>screen.textContent+='\nMainboard............... Supermicro X13QH-T  OK',2500);
 setTimeout(()=>screen.textContent+='\nCPU..................... 4x Xeon Platinum OK',3000);
@@ -81,7 +81,7 @@ setTimeout(()=>{inputLocked=false;showTerminal();},7700);
 }
 
 function menuText(){
-return `--- F.U.C.K.U.P Mainframe v2.1 ---
+return `--- F.U.C.K.U.P Mainframe v2.4 ---
 
 Choose your machine:
 
