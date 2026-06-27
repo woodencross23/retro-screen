@@ -51,10 +51,11 @@ Status: still debugging`,
 "help":`Welcome to linux: there's no help, just endless man pages and your despair.`,
 "logout":`Deckard Cain wants you to stay awhile and listen.`,
 "exit":`Deckard Cain wants you to stay awhile and listen.`,
-"man":`You don't need this.`,
-"sudo":`[sudo] password for client1337: 
-Nice try. This terminal runs on trust issues, not sudoers.`
+"man":`You don't need this.`
 };
+
+const sudoText=`[sudo] password for client1337: 
+Nice try. This terminal runs on trust issues, not sudoers.`;
 
 const fortunes=[
 "You will soon encounter a kernel panic. Or lunch. Hard to tell.",
@@ -313,7 +314,9 @@ closeInfo();
 }
 
 function execute(cmd){
-history.push(cmd); historyPos=history.length;
+history.push(cmd);
+if(history.length>50){history.shift();}
+historyPos=history.length;
 
 if(
    cmd==='10' ||
@@ -334,7 +337,7 @@ if(/^[1-8]$/.test(cmd)){loading('selected machine');return;}
 if(normalized==='sl'){slTrain();return;}
 if(normalized==='matrix'){matrixRain();return;}
 if(normalized==='fortune'){fortuneOutput(cmd);return;}
-if(/^sudo\s+/i.test(cmd.trim())){commandOutput(cmd,commands['sudo']);return;}
+if(/^sudo(\s+.*)?$/i.test(cmd.trim())){commandOutput(cmd,sudoText);return;}
 if(/^cowsay(\s+|$)/i.test(cmd.trim())){
 const text=cmd.trim().replace(/^cowsay\s*/i,'');
 cowsayOutput(text);
