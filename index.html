@@ -6,11 +6,24 @@
 <meta name="author" content="wooden (root@localhost:~#) - Solving problems since C64 BASIC. Physics, Linux and a healthy distrust of rebooting." />
 <title>F.U.C.K.U.P Mainframe v2.4 Terminal Edition</title>
 <style>
-html,body{height:100%;margin:0;background:#000;color:#00e040;font-family:"Courier New",monospace;font-size:22px;line-height:1.15}
-#screen{padding:32px 40px;white-space:pre-wrap}
-#hiddenInput{position:absolute;left:-9999px;opacity:0}
-@keyframes blink{50%{opacity:0}}
-.cursor{animation:blink 1s step-end infinite}
+html, body {
+    height: 100%;
+    margin: 0;
+    background: #000;
+    color: #00e040;
+    font-family: "Courier New", monospace;
+    font-size: 22px;
+    line-height: 1.15;
+}
+#screen {
+    padding: 32px 40px;
+    white-space: pre-wrap;
+}
+#hiddenInput {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+}
 </style>
 </head>
 <body>
@@ -69,7 +82,7 @@ document.addEventListener('click',focusInput);
 
 function rebootSequence(){
 inputLocked=true;
-screen.textContent='--- Chiquita Client v1.9.4 ---\n\nHandshake to mainframe... OK\nInitializing remote session...';
+screen.textContent='--- Chiquita Client v1.9.5 ---\n\nHandshake to mainframe... OK\nInitializing remote session...';
 setTimeout(()=>screen.textContent+='\n\n[Connection established]',1500);
 setTimeout(()=>screen.textContent+='\nMainboard............... Supermicro X13QH-T  OK',2500);
 setTimeout(()=>screen.textContent+='\nCPU..................... 4x Xeon Platinum OK',3000);
