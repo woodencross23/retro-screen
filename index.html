@@ -234,7 +234,7 @@ else{line=(line+' '+word).trim();}
 if(line)lines.push(line);
 
 const width=Math.max(...lines.map(l=>l.length));
-const top=' '+'_'.repeat(width+2);
+const top=' '+'-'.repeat(width+2);
 const bottom=' '+'-'.repeat(width+2);
 const body=lines.map((l,i)=>{
 const pad=l+' '.repeat(width-l.length);
