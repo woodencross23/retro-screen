@@ -1,6 +1,5 @@
-The dream: One oversized mainframe in a rack and a bunch of tiny clients around the house.
+A retro-inspired homelab experiment.
 
-This project is a small proof of concept for a homelab setup where one central server provides computing resources to multiple lightweight clients.
-Instead of a modern desktop, users are greeted by a retro terminal menu. Selecting an option would start a dedicated VM with its own hardware profile and GPU allocation.
-For now, none of that actually exists. The project is only a visual mockup with a few hidden easter eggs.
-It's basically a tribute to old terminals, mainframes, and the idea that computing doesn't always need to look modern.
+The concept is simple: one powerful "mainframe" in a rack and multiple lightweight clients throughout the house. Each client boots into a terminal-style menu and requests a predefined virtual machine from the server. Different profiles could provide different hardware allocations as RAM or CPU computing power, operating systems, or GPU resources such as NVIDIA L40S or RTX Pro 6000 cards.
+
+Currently, this repository contains only the frontend concept. There is no real backend, virtualization layer, or provisioning system. It's mostly a tribute to old terminals, mainframes, and the idea that modern infrastructure can still have personality. Hidden easter eggs included.
