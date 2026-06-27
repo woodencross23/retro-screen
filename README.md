@@ -1,3 +1,6 @@
-The basic idea is to run a mainframe in homelab rack, rest of the house only small clients showing this retro menu on startup. For GPU rasterization in VM i'd like to use nVidia L40S or RTX Pro 6000. So each preconfig VM will load with it's own hardware specs, provided by the mainframe.
+The dream: One oversized mainframe in a rack and a bunch of tiny clients around the house.
 
-There is no real functionality, besides some hidden easter eggs! It's just a DEMO of how my retro menu would look like.
+This project is a small proof of concept for a homelab setup where one central server provides computing resources to multiple lightweight clients.
+Instead of a modern desktop, users are greeted by a retro terminal menu. Selecting an option would start a dedicated VM with its own hardware profile and GPU allocation.
+For now, none of that actually exists. The project is only a visual mockup with a few hidden easter eggs.
+It's basically a tribute to old terminals, mainframes, and the idea that computing doesn't always need to look modern.
