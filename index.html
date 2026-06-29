@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="wooden (root@localhost:~#) - Solving problems since C64 BASIC. Physics, Linux and a healthy distrust of rebooting." />
-<title>F.U.C.K.U.P Mainframe v2.4 Terminal Edition</title>
+<title>F.U.C.K.U.P Mainframe v2.6 Terminal Edition</title>
 <style>
 html, body {
     height: 100%;
@@ -37,6 +37,20 @@ const hidden=document.getElementById('hiddenInput');
 let history=[],historyPos=0,current='';
 let inputLocked=false;
 
+const MENU=`--- F.U.C.K.U.P Mainframe v2.6 ---
+
+Choose your machine:
+
+1. Win11 shooter (low ping)
+2. Win11 graphics (max GPU)
+3. Win11 average use
+4. MacOS cutting/editing
+5. Linux arch
+6. Linux debian
+7. Linux tails
+8. UniFi maintenance
+9. Reboot client`;
+
 const commands={
 "rm -rf *":`Nice try.
 
@@ -61,11 +75,10 @@ cowsay [text]
 logout`,
 "logout":`Deckard Cain wants you to stay awhile and listen.`,
 "exit":`Deckard Cain wants you to stay awhile and listen.`,
-"man":`You don't need this.`
+"man":`I hope you brought some time to study endless manpages.`
 };
 
-const sudoText=`[sudo] password for client1337: 
-Nice try. This terminal runs on trust issues, not sudoers.`;
+const sudoText=`Nice try. This terminal runs on trust issues, not sudoers.`;
 
 const fortunes=[
 "You will soon encounter a kernel panic. Or lunch. Hard to tell.",
@@ -81,19 +94,7 @@ const fortunes=[
 ];
 
 function commandOutput(cmd,text){
-screen.textContent=`--- F.U.C.K.U.P Mainframe v2.4 ---
-
-Choose your machine:
-
-1. Win11 shooter (low ping)
-2. Win11 graphics (max GPU)
-3. Win11 average use
-4. MacOS cutting/editing
-5. Linux arch
-6. Linux debian
-7. Linux tails
-8. UniFi maintenance
-9. Reboot client
+screen.textContent=`${MENU}
 
 client1337@mainframe:~# ${cmd}
 
@@ -108,7 +109,7 @@ commandOutput(cmd,pick);
 }
 
 
-function focusInput(){hidden.focus();}
+const focusInput=()=>hidden.focus();
 document.addEventListener('click',focusInput);
 
 function slTrain(){
@@ -156,7 +157,7 @@ if(ticks>=70){clearInterval(t);inputLocked=false;render();}
 
 function rebootSequence(){
 inputLocked=true;
-screen.textContent='--- Chiquita Client v1.9.5 ---\n\nHandshake to mainframe... OK\nInitializing remote session...';
+screen.textContent='--- Chiquita Client v1.9.6 ---\n\nHandshake to mainframe... OK\nInitializing remote session...';
 setTimeout(()=>screen.textContent+='\n\n[Connection established]',1500);
 setTimeout(()=>screen.textContent+='\nMainboard............... Supermicro X13QH-T  OK',2500);
 setTimeout(()=>screen.textContent+='\nCPU..................... 4x Xeon Platinum OK',3000);
@@ -164,28 +165,14 @@ setTimeout(()=>screen.textContent+='\nMemory.................. 12 TB ECC OK',350
 setTimeout(()=>screen.textContent+='\nGPU Cluster............. 4x NVIDIA L40S OK',4000);
 setTimeout(()=>screen.textContent+='\nStorage Pool............ 8.4 PB NVMe OK',4500);
 setTimeout(()=>screen.textContent+='\nPower Draw.............. '+(9.3+Math.random()*5.6).toFixed(1)+' kW OK',5000);
-setTimeout(()=>{inputLocked=false;showTerminal();},7700);
+setTimeout(()=>{inputLocked=false;render();},7700);
 }
 
 function menuText(){
-return `--- F.U.C.K.U.P Mainframe v2.4 ---
-
-Choose your machine:
-
-1. Win11 shooter (low ping)
-2. Win11 graphics (max GPU)
-3. Win11 average use
-4. MacOS cutting/editing
-5. Linux arch
-6. Linux debian
-7. Linux tails
-8. UniFi maintenance
-9. Reboot client
+return `${MENU}
 
 client1337@mainframe:~# ${current}_`;
 }
-
-function showTerminal(){screen.textContent=menuText();}
 
 function render(){screen.textContent=menuText();}
 
