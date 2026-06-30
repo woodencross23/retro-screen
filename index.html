@@ -165,6 +165,7 @@ setTimeout(()=>screen.textContent+='\nMemory.................. 12 TB ECC OK',350
 setTimeout(()=>screen.textContent+='\nGPU Cluster............. 4x NVIDIA L40S OK',4000);
 setTimeout(()=>screen.textContent+='\nStorage Pool............ 8.4 PB NVMe OK',4500);
 setTimeout(()=>screen.textContent+='\nPower Draw.............. '+(9.3+Math.random()*5.6).toFixed(1)+' kW OK',5000);
+setTimeout(()=>screen.textContent+="\n\nType 'help' for available commands.",6000);
 setTimeout(()=>{inputLocked=false;render();},7700);
 }
 
@@ -354,16 +355,28 @@ hidden.addEventListener('input', ()=>{
   render();
 });
 
-hidden.addEventListener('keydown', (e)=>{
-  if(inputLocked){ e.preventDefault(); return; }
-  if(e.key==='Enter'){
-    e.preventDefault();
-    const cmd = hidden.value.trim();
-    hidden.value='';
-    current='';
-    execute(cmd);
-    return;
-  }
+hidden.addEventListener('keydown', (e) => {
+    if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+        e.preventDefault();
+        return;
+    }
+
+    if (inputLocked) {
+        e.preventDefault();
+        return;
+    }
+
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+        const cmd = hidden.value.trim();
+
+        hidden.value = '';
+        current = '';
+
+        execute(cmd);
+        return;
+    }
 });
 
 
